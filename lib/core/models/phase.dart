@@ -1,16 +1,17 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
 class Phase {
   final String id;
-  String? title;
+  final String? title;
   final DateTime start;
-  DateTime? finish;
+  final DateTime finish;
 
   Phase({
     required this.id,
     this.title,
     required this.start,
-    this.finish,
+    required this.finish,
   });
 
   Phase copyWith({
@@ -32,7 +33,7 @@ class Phase {
       'id': id,
       'title': title,
       'start': start.millisecondsSinceEpoch,
-      'finish': finish?.millisecondsSinceEpoch,
+      'finish': finish.millisecondsSinceEpoch,
     };
   }
 
@@ -41,9 +42,7 @@ class Phase {
       id: map['id'] as String,
       title: map['title'] != null ? map['title'] as String : null,
       start: DateTime.fromMillisecondsSinceEpoch(map['start'] as int),
-      finish: map['finish'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['finish'] as int)
-          : null,
+      finish: DateTime.fromMillisecondsSinceEpoch(map['finish'] as int),
     );
   }
 
