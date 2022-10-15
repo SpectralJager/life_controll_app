@@ -1,86 +1,115 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:animations/animations.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:life_controll_app/views/home/bloc/home_bloc.dart';
+import 'package:life_controll_app/views/home/widgets/home_statistics.dart';
+
+import 'package:life_controll_app/views/widgets/drawer.dart';
+import 'package:table_calendar/table_calendar.dart';
+
+import 'home_appbar.dart';
+import 'home_main.dart';
+import 'home_navbar.dart';
+import 'home_statistic.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.grey.shade800,
-        toolbarHeight: 84,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(100),
-                border: Border.all(
-                  width: 1,
-                  strokeAlign: StrokeAlign.outside,
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black,
-                    offset: Offset(3, 3),
-                  ),
-                ],
-              ),
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              child: Image.network(
-                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60",
-                fit: BoxFit.cover,
-              ),
+    var theme = Theme.of(context);
+    final pages = [
+      HomeMain(theme: theme),
+      HomeStatistics(theme: theme),
+      HomeSchedule(theme: theme),
+    ];
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: theme.colorScheme.primaryContainer,
+            toolbarHeight: 84,
+            automaticallyImplyLeading: false,
+            title: HomeAppbar(theme: theme),
+          ),
+          bottomNavigationBar: HomeNavBar(theme: theme),
+          drawer: MainDrawer(theme: theme),
+          body: PageTransitionSwitcher(
+            transitionBuilder: (
+              Widget child,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) {
+              return FadeThroughTransition(
+                animation: animation,
+                secondaryAnimation: secondaryAnimation,
+                child: child,
+              );
+            },
+            child: pages[state.pageIndex],
+          ),
+          // body: HomeMain(theme: theme),
+        );
+      },
+    );
+  }
+}
+
+class HomeSchedule extends StatelessWidget {
+  const HomeSchedule({super.key, required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TableCalendar(
+          focusedDay: DateTime.now(),
+          firstDay: DateTime.now().subtract(Duration(days: 365 * 2)),
+          lastDay: DateTime.now().add(
+            Duration(days: 365 * 2),
+          ),
+          calendarFormat: CalendarFormat.month,
+          headerStyle: HeaderStyle(
+            decoration:
+                BoxDecoration(color: theme.colorScheme.primaryContainer),
+            titleTextStyle: theme.textTheme.titleMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onPrimaryContainer,
             ),
-            const SizedBox(
-              width: 20,
+            headerMargin: EdgeInsets.only(bottom: 16, top: 0),
+            headerPadding: EdgeInsets.only(top: 0),
+            formatButtonVisible: false,
+          ),
+          daysOfWeekStyle: DaysOfWeekStyle(
+            weekdayStyle: theme.textTheme.bodyMedium!
+                .copyWith(color: theme.colorScheme.onBackground),
+            weekendStyle: theme.textTheme.bodyMedium!.copyWith(
+              color: theme.colorScheme.primary,
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  "Welcome back,",
-                  style: TextStyle(fontWeight: FontWeight.w300),
-                ),
-                Text("User!"),
-              ],
+          ),
+          calendarStyle: CalendarStyle(
+            weekendTextStyle: theme.textTheme.bodyMedium!.copyWith(
+              color: theme.colorScheme.primary,
             ),
-            const Spacer(),
-            IconButton(
-                onPressed: () {
-                  ScaffoldState().openDrawer();
-                },
-                icon: const Icon(Icons.menu)),
-          ],
+            defaultTextStyle: theme.textTheme.bodyMedium!.copyWith(
+              color: theme.colorScheme.onBackground,
+            ),
+            todayDecoration:
+                BoxDecoration(color: theme.colorScheme.primaryContainer),
+            todayTextStyle: theme.textTheme.bodyMedium!.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+            outsideTextStyle: theme.textTheme.bodyMedium!.copyWith(
+              color: theme.colorScheme.secondary.withOpacity(.7),
+            ),
+          ),
         ),
-      ),
-      drawer: Drawer(
-        backgroundColor: Colors.red,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.orange,
-        unselectedItemColor: Colors.orange.shade100,
-        showUnselectedLabels: false,
-        showSelectedLabels: false,
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart), label: "Statistic"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.schedule), label: "Schedule"),
-        ],
-      ),
+      ],
     );
   }
 }
